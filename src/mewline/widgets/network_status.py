@@ -4,6 +4,7 @@ from threading import Lock
 from fabric.utils import exec_shell_command_async
 from gi.repository import GLib
 from loguru import logger
+import os
 
 import mewline.constants as cnst
 from mewline.config import cfg
@@ -104,6 +105,7 @@ class NetworkStatus(ButtonWidget):
                 capture_output=True,
                 text=True,
                 check=True,
+                env=dict(os.environ, LC_ALL="C") # 加上这行，强制英文输出
             )
             radio_state = radio_result.stdout.strip()
 
@@ -116,6 +118,7 @@ class NetworkStatus(ButtonWidget):
                 capture_output=True,
                 text=True,
                 check=True,
+                env=dict(os.environ, LC_ALL="C") # 加上这行，强制英文输出
             )
             active_connection = device_result.stdout
 
@@ -143,6 +146,7 @@ class NetworkStatus(ButtonWidget):
                 capture_output=True,
                 text=True,
                 check=True,
+                env=dict(os.environ, LC_ALL="C") # 加上这行，强制英文输出
             )
             output = wifi_result.stdout
 

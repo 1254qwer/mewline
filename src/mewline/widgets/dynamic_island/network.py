@@ -2,6 +2,7 @@ import subprocess
 from collections.abc import Callable
 from threading import Lock
 from typing import Literal
+import os
 
 from fabric.widgets.box import Box
 from fabric.widgets.button import Button
@@ -766,6 +767,7 @@ class NetworkConnections(BaseDiWidget, Box):
                 capture_output=True,
                 text=True,
                 check=True,
+                env=dict(os.environ, LC_ALL="C") # 👉 加入这行，强制 nmcli 输出英文
             )
             return "enabled" in result.stdout
         except subprocess.CalledProcessError as e:
