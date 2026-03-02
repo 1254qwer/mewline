@@ -8,3 +8,16 @@ wheels/
 
 # Virtual environments
 .venv
+# Arch Linux build artifacts
+/pkg/
+/src/
+/mewline/
+*.pkg.tar.zst
+*.pkg.tar.xz
+*.log
+/diff
+
+# Backups and temporary files
+*bak
+.venv/
+__pycache__/
