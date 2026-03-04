@@ -11,7 +11,7 @@ class Bluetooth(ButtonWidget):
     """A button for open the Bluetooth menu."""
 
     def __init__(self, **kwargs):
-        super().__init__(name="power", **kwargs)
+        super().__init__(name="bluetooth-button", **kwargs)
         self.config = cfg.modules.power
 
         self.set_tooltip_text("Bluetooth")
