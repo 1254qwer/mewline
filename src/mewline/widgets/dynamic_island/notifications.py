@@ -180,94 +180,132 @@ class NotificationBox(Box):
         # Island-level hover detection will handle pausing, keep simple setup
         self.start_timeout()
 
+
     def create_content(self, notification):
-        return Box(
-            name="notification-content",
-            spacing=8,
-            v_align="start",
-            h_expand=True,
-            h_align="fill",
-            children=[
-                Box(
-                    name="notification-image",
-                    v_align="start",
-                    children=CustomImage(
-                        pixbuf=notification.image_pixbuf.scale_simple(
-                            48, 48, GdkPixbuf.InterpType.BILINEAR
-                        )
-                        if notification.image_pixbuf
-                        else self.get_pixbuf(notification.app_icon, 48, 48)
+            # --- 1. 防御性 Pixbuf 提取与详细日志记录 ---
+            final_pixbuf = None
+            app_name = getattr(notification, "app_name", "Unknown App")
+            summary = getattr(notification, "summary", "No Summary")
+
+            try:
+                # 尝试获取 image_pixbuf，这里是最容易发生 Segfault 的雷区
+                # 我们用 try-except 把它死死包住
+                if hasattr(notification, "image_pixbuf") and notification.image_pixbuf:
+                    final_pixbuf = notification.image_pixbuf.scale_simple(
+                        48, 48, GdkPixbuf.InterpType.BILINEAR
+                    )
+            except Exception as e:
+                # 一旦底层 C 库报错，拦截并打印详细的肇事者信息
+                logger.warning(
+                    f"[Notification Crash Prevented] App: '{app_name}', "
+                    f"Summary: '{summary}'. Error: {e}"
+                )
+
+            # 2. 如果第一步失败或没有图片，优雅降级去获取 app_icon
+            if not final_pixbuf:
+                final_pixbuf = self.get_pixbuf(getattr(notification, "app_icon", ""), 48, 48)
+
+            # 3. 如果还是没有（终极保底），给一个系统默认的通知图标，防止动态岛排版崩塌
+            if not final_pixbuf:
+                try:
+                    theme = Gtk.IconTheme.get_default()
+                    final_pixbuf = theme.load_icon("dialog-information-symbolic", 48, Gtk.IconLookupFlags.FORCE_SIZE)
+                except Exception:
+                    pass
+
+            # --- 返回构建好的 UI 容器 ---
+            return Box(
+                name="notification-content",
+                spacing=8,
+                v_align="start",
+                h_expand=True,
+                h_align="fill",
+                children=[
+                    Box(
+                        name="notification-image",
+                        v_align="start",
+                        children=CustomImage(pixbuf=final_pixbuf) if final_pixbuf else Box(),
                     ),
-                ),
-                Box(
-                    name="notification-text",
-                    orientation="v",
-                    v_align="start",
-                    h_expand=True,
-                    h_align="fill",
-                    children=[
-                        Box(
-                            name="notification-summary-box",
-                            orientation="h",
-                            h_expand=True,
-                            children=[
-                                Label(
-                                    name="notification-title",
-                                    markup=GLib.markup_escape_text(
-                                        notification.summary.replace("\n", " ")
+                    Box(
+                        name="notification-text",
+                        orientation="v",
+                        v_align="start",
+                        h_expand=True,
+                        h_align="fill",
+                        children=[
+                            Box(
+                                name="notification-summary-box",
+                                orientation="h",
+                                h_expand=True,
+                                children=[
+                                    Label(
+                                        name="notification-title",
+                                        markup=GLib.markup_escape_text(
+                                            notification.summary.replace("\n", " ")
+                                        ),
+                                        h_align="start",
+                                        ellipsization="end",
+                                        xalign=0,
                                     ),
-                                    h_align="start",
-                                    ellipsization="end",
-                                    xalign=0,
-                                ),
-                                Label(
-                                    name="notification-app-name",
-                                    markup=" | "
-                                    + GLib.markup_escape_text(notification.app_name),
-                                    h_align="start",
-                                    ellipsization="end",
-                                    xalign=0,
-                                ),
-                            ],
-                        ),
-                        Label(
-                            name="notification-text",
-                            markup=GLib.markup_escape_text(
-                                notification.body.replace("\n", " ")
+                                    Label(
+                                        name="notification-app-name",
+                                        markup=" | "
+                                        + GLib.markup_escape_text(notification.app_name),
+                                        h_align="start",
+                                        ellipsization="end",
+                                        xalign=0,
+                                    ),
+                                ],
                             ),
-                            h_align="start",
-                            ellipsization="end",
-                        )
-                        if notification.body
-                        else Box(),
-                    ],
-                ),
-                Box(
-                    orientation="v",
-                    v_align="start",
-                    children=[
-                        self.create_close_button(),
-                        # Removed the expanding Box(v_expand=True)
-                        # that was pushing content down
-                    ],
-                ),
-            ],
-        )
+                            Label(
+                                name="notification-text",
+                                markup=GLib.markup_escape_text(
+                                    notification.body.replace("\n", " ")
+                                ),
+                                h_align="start",
+                                ellipsization="end",
+                            )
+                            if notification.body
+                            else Box(),
+                        ],
+                    ),
+                    Box(
+                        orientation="v",
+                        v_align="start",
+                        children=[
+                            self.create_close_button(),
+                        ],
+                    ),
+                ],
+            )
 
     def get_pixbuf(self, icon_path, width, height):
+        if not icon_path:
+            return None
+
         if icon_path.startswith("file://"):
             icon_path = icon_path[7:]
 
-        if not os.path.exists(icon_path):
-            logger.warning(f"Icon path does not exist: {icon_path}")
-            return None
+        # 策略 A：当做绝对路径文件来解析
+        if os.path.exists(icon_path):
+            try:
+                pixbuf = GdkPixbuf.Pixbuf.new_from_file(icon_path)
+                return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+            except Exception as e:
+                logger.error(f"Failed to load or scale icon file '{icon_path}': {e}")
+                return None
 
+        # 策略 B：当做系统主题代号（Theme Icon）来解析
+        # 修复了之前一律报 'Icon path does not exist' 的愚蠢逻辑
         try:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(icon_path)
-            return pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+            theme = Gtk.IconTheme.get_default()
+            if theme.has_icon(icon_path):
+                return theme.load_icon(icon_path, width, Gtk.IconLookupFlags.FORCE_SIZE)
         except Exception as e:
-            logger.error(f"Failed to load or scale icon: {e}")
-            return None
+            logger.error(f"Failed to load theme icon '{icon_path}': {e}")
+
+        logger.warning(f"Icon resolution failed for: '{icon_path}' (Not a file, nor a theme icon)")
+        return None
 
     def create_action_buttons(self, notification):
         return Box(
