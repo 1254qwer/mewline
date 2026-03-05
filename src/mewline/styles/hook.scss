@@ -1,0 +1,149 @@
+
+/* ========================================================= */
+/* ELEGANT PASTEL THEME v6 - REFACTORED & OPTIMIZED          */
+/* 100% ASCII ONLY - Clean, DRY, and GTK-safe                */
+/* ========================================================= */
+
+/* ========================================================= */
+/* SHARED PILL BASE STYLES (DRY Optimization)                */
+/* ========================================================= */
+/* Apply common shape, padding, and font color to all standard modules */
+#language,
+#date-time-button,
+#power,
+#wifi-status,
+#bluetooth-button,
+#battery,
+#ocr {
+    border-radius: 999px;
+    padding: 0 12px;
+    border: none;
+    box-shadow: none;
+    color: #11111b;
+    outline: none;
+}
+
+/* Strip native backgrounds and inherit colors for ALL inner elements */
+#language *,
+#date-time-button *,
+#date-time *,
+#power *,
+#wifi-status *,
+#bluetooth-button *,
+#battery *,
+#ocr * {
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    color: inherit;
+}
+
+/* ========================================================= */
+/* MODULE COLOR ASSIGNMENTS (Right to Left sequence)         */
+/* ========================================================= */
+#power            { background-color: #dd9980; }
+#wifi-status      { background-color: #df9981; }
+#bluetooth-button { background-color: #e2b4a4; }
+#date-time-button { background-color: #e3b6a6; }
+#language         { background-color: #e2cec9; }
+#battery          { background-color: #8db7de; }
+#ocr              { background-color: #6795c2; }
+
+/* ========================================================= */
+/* SPECIAL MODULE: AUDIO / OSD (.panel-box wrapper)          */
+/* ========================================================= */
+#combined-controls {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+#combined-controls .panel-box {
+    background-color: #c3daf2;
+    border-radius: 999px;
+    padding: 0 12px;
+}
+#combined-controls .panel-box * {
+    color: #11111b;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* ========================================================= */
+/* SPECIAL MODULE: SYSTEM TRAY                               */
+/* ========================================================= */
+#system-tray,
+#system-tray.active,
+#system-tray:hover,
+#system-tray:active,
+#system-tray:checked,
+#system-tray:focus-within { 
+    background-color: #b97382; 
+    border-radius: 999px; 
+    padding: 0 12px; 
+    border: none;
+    box-shadow: none;
+}
+#system-tray *,
+#system-tray image,
+#system-tray .tray-item-btn,
+#system-tray .tray-item-btn:hover,
+#system-tray .tray-item-btn:active,
+#system-tray .chevron-icon { 
+    color: #ffffff; 
+    background-color: transparent; 
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+/* ========================================================= */
+/* SPECIAL MODULE: WORKSPACES                                */
+/* ========================================================= */
+#workspaces-box {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+}
+#workspaces { 
+    background-color: #cfb0b8; 
+    border-radius: 999px; 
+    border: none; 
+    box-shadow: none; 
+}
+#workspaces button { 
+    background-color: transparent; 
+    color: #313244; 
+    font-weight: bold; 
+    border-radius: 999px; 
+    border: none; 
+    box-shadow: none;
+    transition: all 0.2s ease;
+}
+#workspaces button * {
+    color: inherit;
+}
+#workspaces button:hover { 
+    background-color: rgba(0, 0, 0, 0.08); 
+    color: #11111b; 
+}
+#workspaces button.active, 
+#workspaces button:checked { 
+    background-color: #e1d4da; 
+    color: #11111b; 
+    font-weight: bold;
+    padding: 0 14px; 
+}
+
+/* ========================================================= */
+/* SPECIAL MODULE: DYNAMIC ISLAND                            */
+/* ========================================================= */
+#dynamic-island { 
+    background-color: #1e1e2e; 
+    border: 1px solid #e1d4db; 
+    border-radius: 999px; 
+    margin: 4px 6px; 
+    padding: 2px 14px; 
+}

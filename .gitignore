@@ -1,23 +1,52 @@
-# Python-generated files
+# ==========================================
+# 1. Python 运行与编译缓存
+# ==========================================
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ==========================================
+# 2. Python 构建与分发产物 (Setuptools / uv)
+# ==========================================
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+*.egg
 
-# Virtual environments
-.venv
-# Arch Linux build artifacts
+# ==========================================
+# 3. 虚拟环境 (Virtual Environments)
+# ==========================================
+.venv/
+venv/
+env/
+
+# ==========================================
+# 4. Arch Linux 打包产物 (makepkg)
+# ==========================================
+# 如果在此根目录运行 makepkg，原生的 src/ 生成机制将与 Python 的 src/ 源码目录发生致命冲突。天哪没文化真可怕我说每次怎么我的src都没了qwq
 /pkg/
-/src/
-/mewline/
 *.pkg.tar.zst
 *.pkg.tar.xz
+*.pkg.tar.zst.sig
 *.log
 /diff
 
-# Backups and temporary files
+# ==========================================
+# 5. 编辑器与 IDE 临时文件
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 *bak
-.venv/
-__pycache__/
+
+# ==========================================
+# 6. 系统级生成的垃圾文件
+# ==========================================
+.DS_Store
+Thumbs.db
