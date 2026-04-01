@@ -12,6 +12,7 @@ from mewline.config import cfg
 from mewline.shared.widget_container import ButtonWidget
 from mewline.utils.misc import check_tools_available
 from mewline.utils.widget_utils import text_icon
+from mewline.utils.window_manager import WindowManagerContext
 
 
 class OCRWidget(ButtonWidget):
